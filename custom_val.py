@@ -1,6 +1,6 @@
 import val
 import matplotlib.pyplot as plt
-import os, torch, cv2, shutil
+import os, torch, cv2, shutil, json
 import numpy as np
 import pandas as pd
 from utils.metrics import bbox_iou
@@ -43,23 +43,60 @@ def draw_boxes(filename, imgpath, correct):
     img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB) #cv2 is by default in bgr
     return(img)
 
-### STEP ONE: RUN VALIDATION ON GROUND TRUTH ANNOTATIONS
+''' STEP ONE: RUN INFERENCE ON VIDEO'''
 
-img_sz = [640] # [640, 960,1280, 1600, 1920]
-# paths for yolo
-datapath = '/home/jennaehnot/Desktop/ccom_yolov5/model_testing/dataset.yaml' # path to yaml containing path to groud truth annotation
-modelpath = '/home/jennaehnot/Desktop/ccom_yolov5/model_testing/model3_4_best.pt'
-# path to save predictions 
-lbl_save_dir = '/home/jennaehnot/Desktop/ccom_yolov5/model_testing/redball_150cmH/predicted_labels/' # path where to save generated labels
-time_data = []
+# load yolo model
+yolo_dir = '/home/jennaehnot/Desktop/ccom_yolov5'
+weights_path= 'ccom_yolov5/model_testing/model3_4_best.pt'
+model = torch.hub.load('ccom_yolov5', 'custom', path = weights_path, source='local',force_reload=True)
 
-for sz in img_sz:
-    name = 'imgsz' + str(sz)
-    # verbose outputs time stats in results, exist_ok will overwrite the folder if  it already exists instead of numerating 
-    results = val.run(datapath,modelpath, imgsz=1280, save_txt=True, save_hybrid=False, save_conf= True, verbose=True, project = lbl_save_dir, name = name,exist_ok=True)
-    times = results[2] # in ms: pre-process, inference, NMS 
-    time_data.append(list(times))
+# path to imgs, read filenames and sort them alphabetically
+img_dir = '/home/jennaehnot/Desktop/ccom_yolov5/model_testing/redball_150cmH/images/val/'
+img_filenames=os.listdir(img_dir)
+img_filenames.sort()
 
+# path to save inference dir
+inf_dir = '/home/jennaehnot/Desktop/ccom_yolov5/model_testing/redball_150cmH/inference/'
+
+# imgsz to run inference at
+img_sz = [640, 960,1280, 1600, 1920]
+
+for sz in img_sz: #for every img size we want to run inference at
+    # make a new folder within the inference folder for each image size
+    imgsz_dir = 'imgsz' + str(sz)
+    img_save_dir = inf_dir + imgsz_dir
+    output_stats = {}
+
+    for file in img_filenames:
+        # run inference
+        img_path = img_dir + file
+        results = model(img_path, size= sz)
+        results.save(labels=True, save_dir=img_save_dir,exist_ok =True) #exist_ok will rewrite existing folders instead of creating a new one so beware !
+        
+        times = list(results.t)
+        times.append(sum(times)) # times = [prep_t, infer_t, nms_t, total]
+        detects = results.pandas().xywhn[0]
+        detects = detects.values.tolist()
+        _, _, img_w, img_h = results.s
+
+        output_stats[file] = {
+            'Time Stats': times,
+            'Detections xywhn:': detects,
+            'Img Dimensions': [img_w, img_h]
+        }
+    
+    # save stats 
+    save_file = img_save_dir + '/inference_results.json'
+    with open(save_file,'w') as json_file:
+        json.dump(output_stats,json_file)
+
+        
+
+
+
+
+
+    '''
 # ### STEP TWO: COMPARE VALIDATION AND GROUND TRUTH LABELS
 gt_lbl_dir = '/home/jennaehnot/Desktop/ccom_yolov5/model_testing/redball_150cmH/labels/val/'
 pred_lbl_dir = lbl_save_dir +  'imgsz640/labels/' # make iterable later (+ name + '/labels') 
@@ -156,3 +193,4 @@ for filename in files:
 
 # correct =  val.process_batch(detects,labels,iouv)
 # print('wait')
+'''
