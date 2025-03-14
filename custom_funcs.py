@@ -67,8 +67,9 @@ def compare_labels(gt_box, det_box, min_iou):
         return(False)
 
 def imgname2frame(img_name):
-    n = img_name[:-4] #remove .png
-    n = n[6:] # remove rb150_
+    # for file name convention: frame_%05d.png
+    n = img_name[-9:-4] # access 5 ints before .png
+
     return(n)
 
 def frames2distances(csvpath):
@@ -96,7 +97,7 @@ def frames2distances(csvpath):
 class Inference:
     def __init__(self, pred_data):
         self.times = pred_data['Time Stats']
-        self.detects = [Detect(i) for i in pred_data['Detections xywhn:']]
+        self.detects = [Detect(i) for i in pred_data['Detections']]
         self.imgsz = pred_data['Img Dimensions']
     
 class Detect:
