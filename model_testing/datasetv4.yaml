@@ -1,0 +1,10 @@
+path: ../dive_tools/annotated_vids
+train: # relative to path
+val: images/val # relative to path
+test: # test # optional
+
+names:
+   0: navBuoy
+   1: mooringBall
+   2: fishingBuoy
+

@@ -1,0 +1,10 @@
+path: model_testing/redball_150cmH/
+train: # relative to path
+val: images/val # relative to path
+test: # test # optional
+
+names:
+   0: navBuoy
+   1: mooringBall
+   2: fishingBuoy
+
