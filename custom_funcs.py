@@ -80,11 +80,15 @@ def frames2distances(csvpath):
     with open(csvpath,'r') as csvfile:
         data = csv.reader(csvfile)
         for lines in data:
-            if lines != ['frame','distance']:
+            if lines != ['frame','distance'] and lines != '':
+                # try:
                 lines = list(map(int,lines))
                 f, d = lines
                 frames.append(f)
                 dists.append(d)
+                # except Exception as e:
+                #     print(e)
+                #     print(lines, csvpath)
     f_min = min(frames)
     f_max = max(frames)
     dif = f_max - f_min
