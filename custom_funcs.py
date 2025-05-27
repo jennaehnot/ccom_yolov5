@@ -97,6 +97,20 @@ def frames2distances(csvpath):
     interp_dists = np.interp(new_frames, frames, dists)
     return(new_frames, interp_dists)
 
+def create_gt_json(gtlbl_dir, outf_name):
+    try:
+        files = os.listdir(gtlbl_dir)
+        files.sort()
+        output = {}
+        for f in files:
+            frame_num = int(imgname2frame(f))
+            lbl = load_labels(f)
+            output[frame_num] = lbl
+        with open(outf_name, 'w') as json_file:
+            json.dump(output,json_file)
+    except Exception as e:
+        print(e)
+
 
 class Inference:
     def __init__(self, pred_data):
