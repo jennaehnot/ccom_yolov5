@@ -1,5 +1,5 @@
 import os, cv2
-import torch, csv
+import torch, csv, glob
 import numpy as np
 import json
 import utils.general as gen
@@ -53,7 +53,7 @@ def load_labels(filepath):
                 labels.append(list(line))
         return(labels)
     else:
-        print(f"File does not exist {filepath}")
+        print(f"There was an issue opening {filepath}")
         return([])
 
 def compare_labels(gt_box, det_box, min_iou):
@@ -99,17 +99,21 @@ def frames2distances(csvpath):
 
 def create_gt_json(gtlbl_dir, outf_name):
     try:
-        files = os.listdir(gtlbl_dir)
+        fs = os.path.join(gtlbl_dir, 'frame*.txt')
+        files = glob.glob(fs, recursive=False)
         files.sort()
         output = {}
         for f in files:
             frame_num = int(imgname2frame(f))
             lbl = load_labels(f)
             output[frame_num] = lbl
+        
         with open(outf_name, 'w') as json_file:
             json.dump(output,json_file)
     except Exception as e:
         print(e)
+
+    return
 
 
 class Inference:
