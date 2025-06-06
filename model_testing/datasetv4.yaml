@@ -1,10 +1,11 @@
-path: ../dive_tools/annotated_vids
-train: # relative to path
-val: images/val # relative to path
-test: # test # optional
+# paste this file into the the data folder of /home/field/jennaDir/yolov5
+path: ../datasets/dataset_v4/  # dataset root dir
+train: images/train  # train images
+val: images/val  # val images 
+test:  # test images (optional)
 
+# Classes
 names:
-   0: navBuoy
-   1: mooringBall
-   2: fishingBuoy
+  0: aton
+  1: buoy
 
