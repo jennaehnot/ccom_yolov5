@@ -1,4 +1,4 @@
-# Ultralytics 🚀 AGPL-3.0 License - https://ultralytics.com/license
+# Ultralytics  AGPL-3.0 License - https://ultralytics.com/license
 """
 Validate a trained YOLOv5 detection model on a detection dataset.
 
@@ -171,8 +171,9 @@ def process_batch(detections, labels, iouv):
     correct = np.zeros((detections.shape[0], iouv.shape[0])).astype(bool)
     iou = box_iou(labels[:, 1:], detections[:, :4])
     correct_class = labels[:, 0:1] == detections[:, 5]
+    correct_class = correct_class.tolist()
     for i in range(len(iouv)):
-        x = torch.where((iou >= iouv[i]) & correct_class)  # IoU > threshold and classes match
+        x = torch.where((iou >= iouv[i])) # & correct_class)  # IoU > threshold and classes match
         if x[0].shape[0]:
             matches = torch.cat((torch.stack(x, 1), iou[x[0], x[1]][:, None]), 1).cpu().numpy()  # [label, detect, iou]
             if x[0].shape[0] > 1:
@@ -181,7 +182,7 @@ def process_batch(detections, labels, iouv):
                 # matches = matches[matches[:, 2].argsort()[::-1]]
                 matches = matches[np.unique(matches[:, 0], return_index=True)[1]]
             correct[matches[:, 1].astype(int), i] = True
-    return torch.tensor(correct, dtype=torch.bool, device=iouv.device)
+    return(torch.tensor(correct, dtype=torch.bool, device=iouv.device), correct_class)
 
 
 @smart_inference_mode()
