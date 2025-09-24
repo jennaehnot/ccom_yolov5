@@ -182,7 +182,7 @@ def process_batch(detections, labels, iouv):
                 # matches = matches[matches[:, 2].argsort()[::-1]]
                 matches = matches[np.unique(matches[:, 0], return_index=True)[1]]
             correct[matches[:, 1].astype(int), i] = True
-    return(torch.tensor(correct, dtype=torch.bool, device=iouv.device), correct_class)
+    return(torch.tensor(correct, dtype=torch.bool, device=iouv.device), correct_class, iou)
 
 
 @smart_inference_mode()
