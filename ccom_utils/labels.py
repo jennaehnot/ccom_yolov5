@@ -1,9 +1,9 @@
 import os, torch, glob, json
-from imgs import imgname2frame
+from ccom_utils.imgs import imgname2frame
 from utils.metrics import bbox_iou
 
 def load_labels(filepath):
-    if os.path.exists(filepath):
+    if os.path.exists(filepath) and filepath.endswith('.txt'):
         labels = []
         with open(filepath, 'r') as file:
             for line in file:
@@ -11,6 +11,7 @@ def load_labels(filepath):
                 line = list(map(float,line))
                 line[0] = int(line[0])
                 labels.append(list(line))
+        file.close()
         return(labels)
     else:
         print(f"There was an issue opening {filepath}")
